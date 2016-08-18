@@ -16,7 +16,7 @@ import botocore.session
 
 def policy_from_source_code(source_code):
     # type: (str) -> Dict[str, Any]
-    from chalice.analyzer import get_client_calls_for_app
+    from lib.chalice.analyzer import get_client_calls_for_app
     client_calls = get_client_calls_for_app(source_code)
     builder = PolicyBuilder()
     policy = builder.build_policy_from_api_calls(client_calls)

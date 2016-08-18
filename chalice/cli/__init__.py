@@ -9,9 +9,9 @@ import json
 import click
 import botocore.exceptions
 
-from chalice import deployer
-from chalice.logs import LogRetriever
-from chalice import prompts
+from lib.chalice import deployer
+from lib.chalice.logs import LogRetriever
+from lib.chalice import prompts
 
 
 TEMPLATE_APP = """\
@@ -68,13 +68,13 @@ def load_project_config(project_dir):
     :raise: OSError/IOError if unable to load the config file.
 
     """
-    config_file = os.path.join(project_dir, '.chalice', 'config.json')
+    config_file = os.path.join(project_dir, 'conf', 'app.json')
     with open(config_file) as f:
         return json.loads(f.read())
 
 
 def load_chalice_app(project_dir):
-    app_py = os.path.join(project_dir, 'app.py')
+    app_py = os.path.join(project_dir, 'routes.py')
     with open(app_py) as f:
         g = {}
         contents = f.read()
@@ -82,7 +82,7 @@ def load_chalice_app(project_dir):
             exec contents in g
         except Exception as e:
             exception = click.ClickException(
-                "Unable to import your app.py file: %s" % e
+                "Unable to import your routes.py file: %s" % e
             )
             exception.exit_code = 2
             raise exception
@@ -139,6 +139,8 @@ def deploy(ctx, project_dir, autogen_policy, profile, stage):
         e.exit_code = 2
         raise e
     except Exception as e:
+        import traceback
+        print traceback.format_exc()
         e = click.ClickException("Error when deploying: %s" % e)
         e.exit_code = 1
         raise e
@@ -172,13 +174,13 @@ def logs(ctx, project_dir, num_entries, include_lambda_messages):
 
 @cli.command('gen-policy')
 @click.option('--filename',
-              help='The filename to analyze.  Otherwise app.py is assumed.')
+              help='The filename to analyze.  Otherwise routes.py is assumed.')
 @click.pass_context
 def gen_policy(ctx, filename):
     from chalice import policy
     if filename is None:
         project_dir = os.getcwd()
-        filename = os.path.join(project_dir, 'app.py')
+        filename = os.path.join(project_dir, 'routes.py')
     if not os.path.isfile(filename):
         click.echo("App file does not exist: %s" % filename)
         raise click.Abort()
@@ -211,7 +213,7 @@ def new_project(ctx, project_name, profile):
         f.write(json.dumps(cfg, indent=2))
     with open(os.path.join(project_name, 'requirements.txt'), 'w') as f:
         pass
-    with open(os.path.join(project_name, 'app.py'), 'w') as f:
+    with open(os.path.join(project_name, 'routes.py'), 'w') as f:
         f.write(TEMPLATE_APP % project_name)
 
 

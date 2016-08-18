@@ -20,9 +20,9 @@ import botocore.session
 import botocore.exceptions
 import virtualenv
 
-import chalice
-from chalice import app
-from chalice import policy
+import lib.chalice
+from lib.chalice import app
+from lib.chalice import policy
 
 
 LAMBDA_TRUST_POLICY = {
@@ -294,7 +294,7 @@ class Deployer(object):
     def _write_config_to_disk(self, config):
         # type: (Dict[str, Any]) -> None
         config_filename = os.path.join(config['project_dir'],
-                                       '.chalice', 'config.json')
+                                       'conf', 'app.json')
         with open(config_filename, 'w') as f:
             f.write(json.dumps(config['config'], indent=2))
 
@@ -390,7 +390,7 @@ class Deployer(object):
 
     def _get_policy_from_source_code(self, config):
         if config['autogen_policy']:
-            app_py = os.path.join(config['project_dir'], 'app.py')
+            app_py = os.path.join(config['project_dir'], 'routes.py')
             assert os.path.isfile(app_py)
             with open(app_py) as f:
                 app_policy = policy.policy_from_source_code(f.read())
@@ -422,7 +422,7 @@ class Deployer(object):
 
     def _load_last_policy(self, config):
         policy_file = os.path.join(config['project_dir'],
-                                   '.chalice', 'policy.json')
+                                   'conf', 'policy.json')
         if not os.path.isfile(policy_file):
             return {}
         with open(policy_file, 'r') as f:
@@ -430,7 +430,7 @@ class Deployer(object):
 
     def _record_policy(self, config, policy):
         policy_file = os.path.join(config['project_dir'],
-                                   '.chalice', 'policy.json')
+                                   'conf', 'policy.json')
         with open(policy_file, 'w') as f:
             f.write(json.dumps(policy, indent=2))
 
@@ -785,7 +785,7 @@ class LambdaDeploymentPackager(object):
             chalice_init = chalice_init[:-1]
         zip.write(chalice_router, 'chalice/__init__.py')
 
-        zip.write(os.path.join(project_dir, 'app.py'),
+        zip.write(os.path.join(project_dir, 'routes.py'),
                   'app.py')
 
     def _hash_requirements_file(self, filename):
@@ -824,15 +824,15 @@ class LambdaDeploymentPackager(object):
         with zipfile.ZipFile(deployment_package_filename, 'r') as inzip:
             with zipfile.ZipFile(tmpzip, 'w') as outzip:
                 for el in inzip.infolist():
-                    if el.filename == 'app.py':
+                    if el.filename == 'routes.py':
                         continue
                     else:
                         contents = inzip.read(el.filename)
                         outzip.writestr(el, contents)
                 # Then at the end, add back the app.py.
-                app_py = os.path.join(project_dir, 'app.py')
+                app_py = os.path.join(project_dir, 'routes.py')
                 assert os.path.isfile(app_py), app_py
-                outzip.write(app_py, 'app.py')
+                outzip.write(app_py, 'routes.py')
         shutil.move(tmpzip, deployment_package_filename)
 
 
