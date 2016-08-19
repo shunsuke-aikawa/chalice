@@ -70,8 +70,10 @@ def load_project_config(project_dir):
     """
     config_file = os.path.join(project_dir, 'conf', 'app.json')
     with open(config_file) as f:
-        return json.loads(f.read())
+        config = json.loads(f.read())
 
+    config["app_name"] = "{}_{}".format(config["app_name"], config["stage"])
+    return config
 
 def load_chalice_app(project_dir):
     app_py = os.path.join(project_dir, 'routes.py')
