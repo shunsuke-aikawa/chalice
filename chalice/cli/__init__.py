@@ -177,7 +177,7 @@ def logs(ctx, project_dir, num_entries, include_lambda_messages):
               help='The filename to analyze.  Otherwise routes.py is assumed.')
 @click.pass_context
 def gen_policy(ctx, filename):
-    from chalice import policy
+    from lib.chalice import policy
     if filename is None:
         project_dir = os.getcwd()
         filename = os.path.join(project_dir, 'routes.py')
@@ -200,9 +200,9 @@ def new_project(ctx, project_name, profile):
     if os.path.isdir(project_name):
         click.echo("Directory already exists: %s" % project_name)
         raise click.Abort()
-    chalice_dir = os.path.join(project_name, '.chalice')
+    chalice_dir = os.path.join(project_name, 'conf')
     os.makedirs(chalice_dir)
-    config = os.path.join(project_name, '.chalice', 'config.json')
+    config = os.path.join(project_name, 'conf', 'config.json')
     cfg = {
         'app_name': project_name,
         'stage': 'dev'

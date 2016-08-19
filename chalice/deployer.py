@@ -1,3 +1,4 @@
+# -*- coding: utf-8 -*-
 """Deploy module for chalice apps.
 
 Handles Lambda and API Gateway deployments.
@@ -262,7 +263,8 @@ class Deployer(object):
         app_name = app_config['app_name']
         if self._query.lambda_function_exists(app_name):
             self._get_or_create_lambda_role_arn(config)
-            self._update_lambda_function(config)
+            #Do not cleate lambda package
+            #self._update_lambda_function(config)
         else:
             function_arn = self._first_time_lambda_create(config)
             # Record the lambda_arn for later use.
@@ -704,7 +706,7 @@ class LambdaDeploymentPackager(object):
         # pip install -t doesn't work out of the box with homebrew and
         # python, so we're using virtualenvs instead which works in
         # more cases.
-        venv_dir = os.path.join(project_dir, '.chalice', 'venv')
+        venv_dir = os.path.join(project_dir, 'conf', 'venv')
         self._create_virtualenv(venv_dir)
         pip_exe = os.path.join(venv_dir, 'bin', 'pip')
         assert os.path.isfile(pip_exe)
@@ -755,7 +757,7 @@ class LambdaDeploymentPackager(object):
         requirements_file = os.path.join(project_dir, 'requirements.txt')
         hash_contents = self._hash_requirements_file(requirements_file)
         deployment_package_filename = os.path.join(
-            project_dir, '.chalice', 'deployments', hash_contents + '.zip')
+            project_dir, 'conf', 'deployments', hash_contents + '.zip')
         return deployment_package_filename
 
     def _add_py_deps(self, zip, deps_dir):
