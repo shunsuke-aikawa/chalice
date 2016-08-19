@@ -49,6 +49,19 @@ CLOUDWATCH_LOGS = {
     "Resource": "arn:aws:logs:*:*:*"
 }
 
+LAMBDA_INVOKE = {
+    "Effect": "Allow",
+    "Action": [
+        "ec2:CreateNetworkInterface",
+        "ec2:DescribeNetworkInterfaces",
+        "ec2:DetachNetworkInterface",
+        "ec2:DeleteNetworkInterface",
+        "rds:*",
+        "lambda:InvokeFunction"
+    ],
+    "Resource": "*"
+}
+
 
 FULL_PASSTHROUGH = """
 #set($allParams = $input.params())
@@ -397,6 +410,7 @@ class Deployer(object):
             with open(app_py) as f:
                 app_policy = policy.policy_from_source_code(f.read())
                 app_policy['Statement'].append(CLOUDWATCH_LOGS)
+                app_policy['Statement'].append(LAMBDA_INVOKE)
                 return app_policy
         else:
             app_policy = self._load_last_policy(config)
