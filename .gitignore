@@ -2,4 +2,10 @@ sample/
 .cache
 venv
 docs/build/
+<<<<<<< HEAD
 *.pyc
+=======
+.idea
+*.py?
+__pycache__/
+>>>>>>> master
